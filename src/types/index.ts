@@ -92,6 +92,41 @@ export interface MechanicalUnit extends SyncFields {
   is_active: boolean;
 }
 
+export interface MaintenanceLog {
+  id: string;
+  island_id: string;
+  operation_type: string;
+  custom_operation_label: string | null;
+  mechanical_unit_id: string | null;
+  component_label: string | null;
+  description: string;
+  technician_name: string;
+  technician_company: string | null;
+  operating_hours_at_event: number | null;
+  cycle_count_at_event: number | null;
+  outcome: string;
+  duration_minutes: number | null;
+  notes: string | null;
+  performed_at: number;
+  created_at: number;
+  updated_at: number;
+  synced_at: number | null;
+  is_active: boolean;
+  is_deleted: boolean;
+}
+
+export const OPERATION_TYPES = [
+  "ROUTINE_INSPECTION", "OIL_CHANGE", "FILTER_REPLACEMENT", "LUBRICATION",
+  "CALIBRATION", "COMPONENT_REPLACEMENT", "ENCODER_REPLACEMENT",
+  "MOTOR_REPLACEMENT", "REDUCER_REPLACEMENT", "SENSOR_REPLACEMENT",
+  "CABLE_REPLACEMENT", "ELECTRICAL_REPAIR", "SOFTWARE_UPDATE",
+  "PARAMETER_TUNING", "EMERGENCY_REPAIR", "REVAMPING", "INSTALLATION", "OTHER",
+] as const;
+
+export const OUTCOMES = [
+  "COMPLETED", "PARTIAL", "DEFERRED", "REQUIRES_PARTS",
+] as const;
+
 // ─── API response wrappers ────────────────────────────────────────────────────
 
 export interface ApiList<T> {

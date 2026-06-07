@@ -2,7 +2,7 @@
 
 # ─── Configuration ────────────────────────────────────────────────────────────
 
-DOMAIN_NAME="admin.calvuz.net"          # subdomain for qreport-web
+DOMAIN_NAME="qreportweb.calvuz.net"          # subdomain for qreport-web
 KTOR_API_URL="http://192.168.0.191:8080" # Ktor backend on internal LAN
 REPO_URL="https://github.com/calvuzs3/qreportweb.git"
 APP_DIR=~/qreport-web

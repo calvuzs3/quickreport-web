@@ -261,3 +261,39 @@ export async function updateMechanicalUnit(
 export async function deleteMechanicalUnit(id: string): Promise<void> {
   await apiFetch(`/api/mechanical-units/${id}`, { method: "DELETE" });
 }
+
+// ─── Maintenance Logs ─────────────────────────────────────────────────────────
+
+export async function getMaintenanceLogs(
+  islandId?: string
+): Promise<ApiList<MaintenanceLog>> {
+  const q = islandId ? `?islandId=${islandId}` : "";
+  return apiFetch<ApiList<MaintenanceLog>>(`/api/maintenance-logs${q}`);
+}
+
+export async function getMaintenanceLog(id: string): Promise<MaintenanceLog> {
+  return apiFetch<MaintenanceLog>(`/api/maintenance-logs/${id}`);
+}
+
+export async function createMaintenanceLog(
+  data: Partial<MaintenanceLog>
+): Promise<MaintenanceLog> {
+  return apiFetch<MaintenanceLog>("/api/maintenance-logs", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateMaintenanceLog(
+  id: string,
+  data: Partial<MaintenanceLog>
+): Promise<MaintenanceLog> {
+  return apiFetch<MaintenanceLog>(`/api/maintenance-logs/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteMaintenanceLog(id: string): Promise<void> {
+  await apiFetch(`/api/maintenance-logs/${id}`, { method: "DELETE" });
+}

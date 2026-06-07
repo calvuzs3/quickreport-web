@@ -1,18 +1,25 @@
-import { getIsland, getFacility, getMechanicalUnits, getClient } from "@/lib/api";
+import { getIsland, getFacility, getMechanicalUnits, getClient, getMaintenanceLogs } from "@/lib/api";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import DeleteButton from "./DeleteButton";
+import type { MaintenanceLog } from "@/types";
 
 export default async function IslandDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  let island, facility, client, units;
+  let island, facility, client, units, logs;
   try {
     island = await getIsland(id);
-    [facility, units] = await Promise.all([getFacility(island.facility_id), getMechanicalUnits(id)]);
+    [facility, units, logs] = await Promise.all([
+      getFacility(island.facility_id),
+      getMechanicalUnits(id),
+      getMaintenanceLogs(id),
+    ]);
     client = await getClient(facility.client_id).catch(() => null);
   } catch { notFound(); }
   if (island.is_deleted) notFound();
+
+  const activeLogs = logs.data.filter((l: MaintenanceLog) => !l.is_deleted);
 
   return (
     <div>
@@ -44,7 +51,6 @@ export default async function IslandDetailPage({ params }: { params: Promise<{ i
             <InfoRow label="Numero seriale" value={island.serial_number} />
             <InfoRow label="N° Commessa" value={island.commissioning_number} />
             <InfoRow label="Modello" value={island.model} />
-            <InfoRow label="N° Modello" value={island.model_number} />
             <InfoRow label="Posizione" value={island.location} />
             <InfoRow label="Ore operative" value={`${island.operating_hours.toLocaleString("it-IT")} h`} />
             <InfoRow label="Cicli totali" value={island.cycle_count.toLocaleString("it-IT")} />
@@ -81,40 +87,92 @@ export default async function IslandDetailPage({ params }: { params: Promise<{ i
             }}>
               <span style={{ color: "var(--color-text-muted)", fontSize: 11 }}>STABILIMENTO</span>
               <div style={{ fontWeight: 500 }}>{facility.name}</div>
-              <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>{facility.facility_type}</div>
             </Link>
           </div>
         </div>
 
-        {island.notes && (
-          <div className="card">
-            <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>Note</h2>
-            <p style={{ fontSize: 13, lineHeight: 1.6, color: "var(--color-text-muted)" }}>{island.notes}</p>
-          </div>
-        )}
+        {/* Mechanical units */}
+        <div className="card">
+          <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>
+            Unità meccaniche ({units.data.filter((u: {is_deleted: boolean}) => !u.is_deleted).length})
+          </h2>
+          <table><thead><tr><th>Nome</th><th>Tipo</th><th>Stato</th></tr></thead>
+            <tbody>
+              {units.data.filter((u: {is_deleted: boolean}) => !u.is_deleted).map((unit: {id: string; name: string; unit_type: string; is_active: boolean}) => (
+                <tr key={unit.id}>
+                  <td style={{ fontWeight: 500 }}>{unit.name}</td>
+                  <td style={{ color: "var(--color-text-muted)" }}>{unit.unit_type}</td>
+                  <td><span className={`badge ${unit.is_active ? "badge-green" : "badge-red"}`}>
+                    {unit.is_active ? "Attiva" : "Inattiva"}
+                  </span></td>
+                </tr>
+              ))}
+              {units.data.filter((u: {is_deleted: boolean}) => !u.is_deleted).length === 0 && (
+                <tr><td colSpan={3} style={{ color: "var(--color-text-muted)", padding: 16 }}>Nessuna unità</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
+      {/* Maintenance logs */}
       <div className="card">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h2 style={{ fontSize: 14, fontWeight: 600 }}>
-            Unità meccaniche ({units.data.filter(u => !u.is_deleted).length})
-          </h2>
+          <div>
+            <h2 style={{ fontSize: 14, fontWeight: 600 }}>Log interventi ({activeLogs.length})</h2>
+            {activeLogs.length > 0 && (
+              <p style={{ fontSize: 12, color: "var(--color-text-muted)", marginTop: 2 }}>
+                Ultimo: {formatDate(activeLogs[0].performed_at)}
+              </p>
+            )}
+          </div>
+          <Link href={`/islands/${id}/logs/new`} className="btn btn-primary btn-sm">
+            + Nuovo intervento
+          </Link>
         </div>
-        <table><thead><tr><th>Nome</th><th>Tipo</th><th>Seriale</th><th>Modello</th><th>Stato</th></tr></thead>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Tipo operazione</th>
+              <th>Componente</th>
+              <th>Esito</th>
+              <th>Tecnico</th>
+              <th>Durata</th>
+              <th></th>
+            </tr>
+          </thead>
           <tbody>
-            {units.data.filter(u => !u.is_deleted).map(unit => (
-              <tr key={unit.id}>
-                <td style={{ fontWeight: 500 }}>{unit.name}</td>
-                <td style={{ color: "var(--color-text-muted)" }}>{unit.unit_type}</td>
-                <td style={{ color: "var(--color-text-muted)" }}>{unit.serial_number ?? "—"}</td>
-                <td style={{ color: "var(--color-text-muted)" }}>{unit.model ?? "—"}</td>
-                <td><span className={`badge ${unit.is_active ? "badge-green" : "badge-red"}`}>
-                  {unit.is_active ? "Attiva" : "Inattiva"}
-                </span></td>
+            {activeLogs.map((log: MaintenanceLog) => (
+              <tr key={log.id}>
+                <td style={{ whiteSpace: "nowrap" }}>{formatDate(log.performed_at)}</td>
+                <td>
+                  <OperationBadge type={log.operation_type} custom={log.custom_operation_label} />
+                </td>
+                <td style={{ color: "var(--color-text-muted)", fontSize: 12 }}>
+                  {log.component_label ?? "—"}
+                </td>
+                <td><OutcomeBadge outcome={log.outcome} /></td>
+                <td style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
+                  {log.technician_name}
+                </td>
+                <td style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
+                  {log.duration_minutes ? `${log.duration_minutes} min` : "—"}
+                </td>
+                <td style={{ textAlign: "right" }}>
+                  <Link href={`/islands/${id}/logs/${log.id}`} className="btn btn-secondary btn-sm">
+                    Dettagli
+                  </Link>
+                </td>
               </tr>
             ))}
-            {units.data.filter(u => !u.is_deleted).length === 0 && (
-              <tr><td colSpan={5} style={{ color: "var(--color-text-muted)", padding: 24 }}>Nessuna unità meccanica</td></tr>
+            {activeLogs.length === 0 && (
+              <tr>
+                <td colSpan={7} style={{ color: "var(--color-text-muted)", padding: 32, textAlign: "center" }}>
+                  Nessun intervento registrato
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
@@ -129,5 +187,37 @@ function InfoRow({ label, value }: { label: string; value: string | null | undef
       <dt style={{ fontSize: 12, color: "var(--color-text-muted)", width: 160, flexShrink: 0 }}>{label}</dt>
       <dd style={{ fontSize: 13 }}>{value ?? "—"}</dd>
     </div>
+  );
+}
+
+function OperationBadge({ type, custom }: { type: string; custom: string | null }) {
+  const isEmergency = type === "EMERGENCY_REPAIR";
+  const isRevamping = type === "REVAMPING";
+  const label = type === "OTHER" && custom ? custom : type.replace(/_/g, " ");
+  return (
+    <span className={`badge ${isEmergency ? "badge-red" : isRevamping ? "badge-orange" : "badge-blue"}`}
+      style={{ fontSize: 11 }}>
+      {label}
+    </span>
+  );
+}
+
+function OutcomeBadge({ outcome }: { outcome: string }) {
+  const map: Record<string, string> = {
+    COMPLETED: "badge-green",
+    PARTIAL: "badge-orange",
+    DEFERRED: "badge-red",
+    REQUIRES_PARTS: "badge-red",
+  };
+  const labels: Record<string, string> = {
+    COMPLETED: "Completato",
+    PARTIAL: "Parziale",
+    DEFERRED: "Rimandato",
+    REQUIRES_PARTS: "Attende ricambi",
+  };
+  return (
+    <span className={`badge ${map[outcome] ?? "badge-blue"}`} style={{ fontSize: 11 }}>
+      {labels[outcome] ?? outcome}
+    </span>
   );
 }
