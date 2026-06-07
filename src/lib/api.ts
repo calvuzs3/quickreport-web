@@ -6,6 +6,7 @@ import type {
   Facility,
   FacilityIsland,
   MechanicalUnit,
+  MaintenanceLog,
   ApiList,
 } from "@/types";
 
