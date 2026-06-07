@@ -4,12 +4,6 @@ services:
     container_name: qreport-web
     restart: unless-stopped
     ports:
-      - "3000:3000"
-    environment:
-      # Ktor backend — internal LAN address
-      KTOR_API_URL: http://192.168.0.191:8080
-      # Generate with: openssl rand -base64 32
-      SESSION_SECRET: ${SESSION_SECRET}
-    # Optional: use an env file instead of inlining secrets above
-    # env_file:
-    #   - .env.local
+      - "3001:3000"
+    env_file:
+      - .env.local
