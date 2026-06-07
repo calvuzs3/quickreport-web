@@ -15,3 +15,9 @@ Thumbs.db
 
 # logs
 npm-debug.log*
+/.idea/dbnavigator.xml
+/.idea/markdown.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/QReportWeb.iml
+/.idea/vcs.xml

@@ -98,10 +98,10 @@ export default async function IslandDetailPage({ params }: { params: Promise<{ i
           </h2>
           <table><thead><tr><th>Nome</th><th>Tipo</th><th>Stato</th></tr></thead>
             <tbody>
-              {units.data.filter((u: {is_deleted: boolean}) => !u.is_deleted).map((unit: {id: string; name: string; unit_type: string; is_active: boolean}) => (
+              {units.data.filter((u: {is_deleted: boolean}) => !u.is_deleted).map((unit: {id: string; name: string; unit_type: string | null; is_active: boolean}) => (
                 <tr key={unit.id}>
                   <td style={{ fontWeight: 500 }}>{unit.name}</td>
-                  <td style={{ color: "var(--color-text-muted)" }}>{unit.unit_type}</td>
+                  <td style={{ color: "var(--color-text-muted)" }}>{unit.unit_type ?? "—"}</td>
                   <td><span className={`badge ${unit.is_active ? "badge-green" : "badge-red"}`}>
                     {unit.is_active ? "Attiva" : "Inattiva"}
                   </span></td>

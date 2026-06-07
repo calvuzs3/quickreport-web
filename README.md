@@ -134,8 +134,9 @@ docker compose up -d --build
 Or use an `.env` file in the same directory as `docker-compose.yml` (not committed to git):
 
 ```
-SESSION_SECRET=your_generated_secret
-KTOR_API_URL=http://192.168.0.191:8080
+# Edit .env.local:
+#   KTOR_API_URL=http://<ktor-server-ip>:8080
+#   SESSION_SECRET=$(openssl rand -base64 32)
 ```
 
 ---
