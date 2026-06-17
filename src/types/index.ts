@@ -7,6 +7,21 @@ export interface SyncFields {
   is_deleted: boolean;
 }
 
+// ─── Island type definition (server-authoritative) ────────────────────────────
+
+export interface IslandType {
+  id: string;
+  code: string;
+  label: string;
+  description: string | null;
+  icon_name: string | null;
+  maintenance_interval_days: number;
+  sort_order: number;
+  is_active: boolean;
+  created_at: number;
+  updated_at: number;
+}
+
 // ─── Entities ─────────────────────────────────────────────────────────────────
 
 export interface Client extends SyncFields {
@@ -66,6 +81,7 @@ export interface FacilityIsland extends SyncFields {
   facility_id: string;
   commissioning_number: string | null;
   island_type: string;
+  island_type_id: string | null;
   serial_number: string;
   model_number: string | null;
   model: string | null;

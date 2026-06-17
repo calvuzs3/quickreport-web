@@ -1,6 +1,6 @@
 # QReport Web
 
-Version:    1.2.0
+Version:    1.2.3
 Date:       07 June 2026
 
 

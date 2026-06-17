@@ -3,15 +3,14 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { generateId } from "@/lib/utils";
-import type { Facility } from "@/types";
-
-const ISLAND_TYPES = ["POLY_MOVE", "POLY_CAST", "POLY_EBT", "POLY_WELD", "POLY_PAINT", "OTHER"];
+import type { Facility, IslandType } from "@/types";
 
 export default function NewIslandPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedFacilityId = searchParams.get("facilityId") ?? "";
   const [facilities, setFacilities] = useState<Facility[]>([]);
+  const [islandTypes, setIslandTypes] = useState<IslandType[]>([]);
   const [form, setForm] = useState({
     facility_id: preselectedFacilityId, island_type: "POLY_MOVE",
     serial_number: "", commissioning_number: "", model: "", model_number: "",
@@ -23,6 +22,9 @@ export default function NewIslandPage() {
   useEffect(() => {
     fetch("/api/facilities").then(r => r.json())
       .then(d => setFacilities(d.data.filter((f: Facility) => !f.is_deleted && f.is_active)))
+      .catch(() => {});
+    fetch("/api/island-types").then(r => r.json())
+      .then(d => setIslandTypes(d.data ?? []))
       .catch(() => {});
   }, []);
 
@@ -74,7 +76,10 @@ export default function NewIslandPage() {
               <label className="form-label">Tipo isola *</label>
               <select className="form-select" value={form.island_type}
                 onChange={e => set("island_type", e.target.value)}>
-                {ISLAND_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                {islandTypes.length > 0
+                  ? islandTypes.map(t => <option key={t.code} value={t.code}>{t.label}</option>)
+                  : <option value="POLY_MOVE">POLY Move</option>
+                }
               </select>
             </div>
             <div className="form-group">

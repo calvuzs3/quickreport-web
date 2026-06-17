@@ -1,10 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import type { FacilityIsland } from "@/types";
-
-const ISLAND_TYPES = ["POLY_MOVE", "POLY_CAST", "POLY_EBT", "POLY_WELD", "POLY_PAINT", "OTHER"];
+import type { FacilityIsland, IslandType } from "@/types";
 
 function epochToDate(ms: number | null | undefined): string {
   if (!ms) return "";
@@ -13,6 +11,7 @@ function epochToDate(ms: number | null | undefined): string {
 
 export default function IslandEditForm({ island }: { island: FacilityIsland }) {
   const router = useRouter();
+  const [islandTypes, setIslandTypes] = useState<IslandType[]>([]);
   const [form, setForm] = useState({
     island_type: island.island_type, serial_number: island.serial_number,
     commissioning_number: island.commissioning_number ?? "",
@@ -27,6 +26,12 @@ export default function IslandEditForm({ island }: { island: FacilityIsland }) {
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/island-types").then(r => r.json())
+      .then(d => setIslandTypes(d.data ?? []))
+      .catch(() => {});
+  }, []);
 
   function set(field: string, value: unknown) { setForm(prev => ({ ...prev, [field]: value })); }
   function dateToEpoch(s: string): number | null { return s ? new Date(s).getTime() : null; }
@@ -71,7 +76,10 @@ export default function IslandEditForm({ island }: { island: FacilityIsland }) {
             <div className="form-group">
               <label className="form-label">Tipo isola *</label>
               <select className="form-select" value={form.island_type} onChange={e => set("island_type", e.target.value)}>
-                {ISLAND_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                {islandTypes.length > 0
+                  ? islandTypes.map(t => <option key={t.code} value={t.code}>{t.label}</option>)
+                  : <option value={form.island_type}>{form.island_type}</option>
+                }
               </select>
             </div>
             <div className="form-group">
