@@ -5,6 +5,7 @@ import type {
   Contract,
   Facility,
   FacilityIsland,
+  IslandType,
   MechanicalUnit,
   MaintenanceLog,
   ApiList,
@@ -56,6 +57,40 @@ export async function login(
     body: JSON.stringify({ username, password }),
   });
   return data.token;
+}
+
+// ─── Island Types ─────────────────────────────────────────────────────────────
+
+export async function getIslandTypes(includeInactive = false): Promise<ApiList<IslandType>> {
+  const q = includeInactive ? "?all=true" : "";
+  return apiFetch<ApiList<IslandType>>(`/api/island-types${q}`);
+}
+
+export async function getIslandType(id: string): Promise<IslandType> {
+  return apiFetch<IslandType>(`/api/island-types/${id}`);
+}
+
+export async function createIslandType(
+  data: Partial<IslandType>
+): Promise<IslandType> {
+  return apiFetch<IslandType>("/api/island-types", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateIslandType(
+  id: string,
+  data: Partial<IslandType>
+): Promise<IslandType> {
+  return apiFetch<IslandType>(`/api/island-types/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteIslandType(id: string): Promise<void> {
+  await apiFetch(`/api/island-types/${id}`, { method: "DELETE" });
 }
 
 // ─── Clients ──────────────────────────────────────────────────────────────────
