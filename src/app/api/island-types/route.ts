@@ -4,3 +4,6 @@ import { proxyRequest } from "@/lib/proxy";
 export async function GET(req: NextRequest) {
   return proxyRequest(req, "/api/island-types");
 }
+export async function POST(req: NextRequest) {
+  return proxyRequest(req, "/api/island-types");
+}

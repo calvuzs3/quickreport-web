@@ -7,9 +7,9 @@ export interface SyncFields {
   is_deleted: boolean;
 }
 
-// ─── Island type definition (server-authoritative) ────────────────────────────
+// ─── Island type definition (master data) ──────────────────────────────────────
 
-export interface IslandType {
+export interface IslandType extends SyncFields {
   id: string;
   code: string;
   label: string;
@@ -18,8 +18,6 @@ export interface IslandType {
   maintenance_interval_days: number;
   sort_order: number;
   is_active: boolean;
-  created_at: number;
-  updated_at: number;
 }
 
 // ─── Entities ─────────────────────────────────────────────────────────────────
