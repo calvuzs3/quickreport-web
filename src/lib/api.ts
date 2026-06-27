@@ -12,6 +12,7 @@ import type {
   CriticalityLevel,
   CheckupStatus,
   CheckItemTemplate,
+  Checkup,
   ApiList,
 } from "@/types";
 
@@ -428,4 +429,14 @@ export async function updateMaintenanceLog(
 
 export async function deleteMaintenanceLog(id: string): Promise<void> {
   await apiFetch(`/api/maintenance-logs/${id}`, { method: "DELETE" });
+}
+
+// ─── Checkups (read-only) ─────────────────────────────────────────────────────
+
+export async function getCheckups(clientId?: string, islandId?: string): Promise<ApiList<Checkup>> {
+  const params = new URLSearchParams();
+  if (clientId) params.set("clientId", clientId);
+  if (islandId) params.set("islandId", islandId);
+  const q = params.size > 0 ? `?${params.toString()}` : "";
+  return apiFetch<ApiList<Checkup>>(`/api/checkups${q}`);
 }

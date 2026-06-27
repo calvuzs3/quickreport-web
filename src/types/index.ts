@@ -198,6 +198,27 @@ export interface CheckItemTemplate extends SyncFields {
   is_active: boolean;
 }
 
+// ─── Checkup ──────────────────────────────────────────────────────────────────
+
+export interface Checkup {
+  id: string;
+  client_company_name: string;
+  client_contact_person: string;
+  client_site: string;
+  client_address: string;
+  island_serial_number: string;
+  island_model: string;
+  technician_name: string;
+  technician_company: string;
+  checkup_date: number;
+  island_type: string;
+  status: string;
+  created_at: number;
+  updated_at: number;
+  completed_at: number | null;
+  is_deleted: boolean;
+}
+
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 export interface LoginRequest {

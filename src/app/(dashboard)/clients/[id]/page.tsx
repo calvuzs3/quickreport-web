@@ -1,4 +1,4 @@
-import { getClient, getFacilities, getContacts, getContracts } from "@/lib/api";
+import { getClient, getFacilities, getContacts, getContracts, getCheckups } from "@/lib/api";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/utils";
@@ -6,10 +6,10 @@ import DeleteButton from "./DeleteButton";
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  let client, facilities, contacts, contracts;
+  let client, facilities, contacts, contracts, checkups;
   try {
-    [client, facilities, contacts, contracts] = await Promise.all([
-      getClient(id), getFacilities(id), getContacts(id), getContracts(id),
+    [client, facilities, contacts, contracts, checkups] = await Promise.all([
+      getClient(id), getFacilities(id), getContacts(id), getContracts(id), getCheckups(id),
     ]);
   } catch { notFound(); }
   if (client.is_deleted) notFound();
@@ -91,6 +91,41 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                 </tr>
               ))}
               {contacts.data.length === 0 && <tr><td colSpan={5} style={{ color: "var(--color-text-muted)" }}>Nessun contatto</td></tr>}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="card" style={{ gridColumn: "1 / -1" }}>
+          <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>
+            Checkup ({checkups?.data.filter(c => !c.is_deleted).length ?? 0})
+          </h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Tecnico</th>
+                <th>Isola (S/N)</th>
+                <th>Tipo isola</th>
+                <th>Stato</th>
+              </tr>
+            </thead>
+            <tbody>
+              {checkups?.data.filter(c => !c.is_deleted).map(c => (
+                <tr key={c.id}>
+                  <td>{formatDate(c.checkup_date)}</td>
+                  <td>{c.technician_name || "—"}</td>
+                  <td style={{ fontFamily: "monospace", fontSize: 12 }}>{c.island_serial_number || "—"}</td>
+                  <td>{c.island_type || "—"}</td>
+                  <td>
+                    <span className={`badge ${c.status === "COMPLETED" ? "badge-green" : c.status === "DRAFT" ? "badge-orange" : "badge-blue"}`}>
+                      {c.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {(!checkups || checkups.data.length === 0) && (
+                <tr><td colSpan={5} style={{ color: "var(--color-text-muted)" }}>Nessun checkup sincronizzato</td></tr>
+              )}
             </tbody>
           </table>
         </div>
