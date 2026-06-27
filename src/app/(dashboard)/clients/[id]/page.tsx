@@ -6,12 +6,14 @@ import DeleteButton from "./DeleteButton";
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  let client, facilities, contacts, contracts, checkups;
+  let client, facilities, contacts, contracts;
   try {
-    [client, facilities, contacts, contracts, checkups] = await Promise.all([
-      getClient(id), getFacilities(id), getContacts(id), getContracts(id), getCheckups(id),
+    [client, facilities, contacts, contracts] = await Promise.all([
+      getClient(id), getFacilities(id), getContacts(id), getContracts(id),
     ]);
   } catch { notFound(); }
+
+  const checkups = await getCheckups(id).catch(() => ({ data: [] }));
   if (client.is_deleted) notFound();
 
   return (
