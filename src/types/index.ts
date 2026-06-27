@@ -153,6 +153,51 @@ export interface ApiError {
   status: number;
 }
 
+// ─── Checkup master data ──────────────────────────────────────────────────────
+
+export interface ModuleType extends SyncFields {
+  id: string;
+  code: string;
+  label: string;
+  description: string | null;
+  icon_name: string | null;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface CriticalityLevel extends SyncFields {
+  id: string;
+  code: string;
+  label: string;
+  priority: number;
+  color_hex: string;
+  icon_emoji: string | null;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface CheckupStatus extends SyncFields {
+  id: string;
+  code: string;
+  label: string;
+  color_hex: string;
+  icon_emoji: string | null;
+  sort_order: number;
+  is_active: boolean;
+  blocks_deletion: boolean;
+  marks_completion: boolean;
+}
+
+export interface CheckItemTemplate extends SyncFields {
+  id: string;
+  module_type_id: string;
+  category: string;
+  description: string;
+  criticality_id: string;
+  order_index: number;
+  is_active: boolean;
+}
+
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 export interface LoginRequest {
@@ -162,4 +207,5 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
+  role: string;
 }

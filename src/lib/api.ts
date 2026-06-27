@@ -8,6 +8,10 @@ import type {
   IslandType,
   MechanicalUnit,
   MaintenanceLog,
+  ModuleType,
+  CriticalityLevel,
+  CheckupStatus,
+  CheckItemTemplate,
   ApiList,
 } from "@/types";
 
@@ -57,6 +61,98 @@ export async function login(
     body: JSON.stringify({ username, password }),
   });
   return data.token;
+}
+
+// ─── Module Types ─────────────────────────────────────────────────────────────
+
+export async function getModuleTypes(includeInactive = false): Promise<ApiList<ModuleType>> {
+  const q = includeInactive ? "?all=true" : "";
+  return apiFetch<ApiList<ModuleType>>(`/api/module-types${q}`);
+}
+
+export async function getModuleType(id: string): Promise<ModuleType> {
+  return apiFetch<ModuleType>(`/api/module-types/${id}`);
+}
+
+export async function createModuleType(data: Partial<ModuleType>): Promise<ModuleType> {
+  return apiFetch<ModuleType>("/api/module-types", { method: "POST", body: JSON.stringify(data) });
+}
+
+export async function updateModuleType(id: string, data: Partial<ModuleType>): Promise<ModuleType> {
+  return apiFetch<ModuleType>(`/api/module-types/${id}`, { method: "PUT", body: JSON.stringify(data) });
+}
+
+export async function deleteModuleType(id: string): Promise<void> {
+  await apiFetch(`/api/module-types/${id}`, { method: "DELETE" });
+}
+
+// ─── Criticality Levels ───────────────────────────────────────────────────────
+
+export async function getCriticalityLevels(includeInactive = false): Promise<ApiList<CriticalityLevel>> {
+  const q = includeInactive ? "?all=true" : "";
+  return apiFetch<ApiList<CriticalityLevel>>(`/api/criticality-levels${q}`);
+}
+
+export async function getCriticalityLevel(id: string): Promise<CriticalityLevel> {
+  return apiFetch<CriticalityLevel>(`/api/criticality-levels/${id}`);
+}
+
+export async function createCriticalityLevel(data: Partial<CriticalityLevel>): Promise<CriticalityLevel> {
+  return apiFetch<CriticalityLevel>("/api/criticality-levels", { method: "POST", body: JSON.stringify(data) });
+}
+
+export async function updateCriticalityLevel(id: string, data: Partial<CriticalityLevel>): Promise<CriticalityLevel> {
+  return apiFetch<CriticalityLevel>(`/api/criticality-levels/${id}`, { method: "PUT", body: JSON.stringify(data) });
+}
+
+export async function deleteCriticalityLevel(id: string): Promise<void> {
+  await apiFetch(`/api/criticality-levels/${id}`, { method: "DELETE" });
+}
+
+// ─── Checkup Statuses ─────────────────────────────────────────────────────────
+
+export async function getCheckupStatuses(includeInactive = false): Promise<ApiList<CheckupStatus>> {
+  const q = includeInactive ? "?all=true" : "";
+  return apiFetch<ApiList<CheckupStatus>>(`/api/checkup-statuses${q}`);
+}
+
+export async function getCheckupStatus(id: string): Promise<CheckupStatus> {
+  return apiFetch<CheckupStatus>(`/api/checkup-statuses/${id}`);
+}
+
+export async function createCheckupStatus(data: Partial<CheckupStatus>): Promise<CheckupStatus> {
+  return apiFetch<CheckupStatus>("/api/checkup-statuses", { method: "POST", body: JSON.stringify(data) });
+}
+
+export async function updateCheckupStatus(id: string, data: Partial<CheckupStatus>): Promise<CheckupStatus> {
+  return apiFetch<CheckupStatus>(`/api/checkup-statuses/${id}`, { method: "PUT", body: JSON.stringify(data) });
+}
+
+export async function deleteCheckupStatus(id: string): Promise<void> {
+  await apiFetch(`/api/checkup-statuses/${id}`, { method: "DELETE" });
+}
+
+// ─── Check Item Templates ─────────────────────────────────────────────────────
+
+export async function getCheckItemTemplates(moduleTypeId?: string): Promise<ApiList<CheckItemTemplate>> {
+  const q = moduleTypeId ? `?moduleTypeId=${moduleTypeId}` : "";
+  return apiFetch<ApiList<CheckItemTemplate>>(`/api/check-item-templates${q}`);
+}
+
+export async function getCheckItemTemplate(id: string): Promise<CheckItemTemplate> {
+  return apiFetch<CheckItemTemplate>(`/api/check-item-templates/${id}`);
+}
+
+export async function createCheckItemTemplate(data: Partial<CheckItemTemplate>): Promise<CheckItemTemplate> {
+  return apiFetch<CheckItemTemplate>("/api/check-item-templates", { method: "POST", body: JSON.stringify(data) });
+}
+
+export async function updateCheckItemTemplate(id: string, data: Partial<CheckItemTemplate>): Promise<CheckItemTemplate> {
+  return apiFetch<CheckItemTemplate>(`/api/check-item-templates/${id}`, { method: "PUT", body: JSON.stringify(data) });
+}
+
+export async function deleteCheckItemTemplate(id: string): Promise<void> {
+  await apiFetch(`/api/check-item-templates/${id}`, { method: "DELETE" });
 }
 
 // ─── Island Types ─────────────────────────────────────────────────────────────

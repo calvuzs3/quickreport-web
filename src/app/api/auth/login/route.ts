@@ -20,10 +20,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { token } = await ktorRes.json();
-    await saveSession(token);
+    const { token, role } = await ktorRes.json();
+    await saveSession(token, role ?? "TECHNICIAN");
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, role: role ?? "TECHNICIAN" });
   } catch (err) {
     console.error("[login]", err);
     return NextResponse.json(
