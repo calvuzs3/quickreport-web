@@ -59,6 +59,24 @@ async function apiFetch<T>(
   return res.json() as Promise<T>;
 }
 
+// ─── Server version (unauthenticated, public endpoint on Ktor) ───────────────
+
+// Returns the raw version string from GET /api/version, or null if the
+// endpoint does not exist yet or Ktor is unreachable.
+export async function getServerVersion(): Promise<string | null> {
+  try {
+    const res = await fetch(`${KTOR_URL}/api/version`, {
+      cache: "no-store",
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) return null;
+    const data = await res.json() as { version?: string };
+    return data.version ?? null;
+  } catch {
+    return null;
+  }
+}
+
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 export async function login(

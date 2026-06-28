@@ -1,4 +1,5 @@
-import { getClients, getFacilities, getIslands, getContacts } from "@/lib/api";
+import { getClients, getFacilities, getIslands, getContacts, getServerVersion } from "@/lib/api";
+import { checkCompatibility, REQUIRED_SERVER_VERSION } from "@/lib/compat";
 import Link from "next/link";
 
 async function StatCard({
@@ -16,13 +17,50 @@ async function StatCard({
   );
 }
 
+function CompatibilityBanner({ serverVersion }: { serverVersion: string | null }) {
+  const status = checkCompatibility(serverVersion);
+
+  if (status.ok === true) return null;
+
+  const isError = status.ok === false;
+  const bg    = isError ? "#fee2e2" : "#fefce8";
+  const color = isError ? "var(--color-danger)" : "#854d0e";
+  const border = isError ? "#fca5a5" : "#fde68a";
+  const icon  = isError ? "⚠️" : "ℹ️";
+
+  return (
+    <div style={{
+      background: bg, color, border: `1px solid ${border}`,
+      borderRadius: "var(--radius)", padding: "12px 16px",
+      marginBottom: 24, fontSize: 13, display: "flex", gap: 10, alignItems: "flex-start",
+    }}>
+      <span style={{ fontSize: 16, flexShrink: 0 }}>{icon}</span>
+      <div>
+        <strong style={{ display: "block", marginBottom: 2 }}>
+          {isError ? "Incompatibilità rilevata" : "Versione server sconosciuta"}
+        </strong>
+        <span>{status.reason}</span>
+        {status.ok === null && (
+          <span style={{ display: "block", marginTop: 4, opacity: 0.8 }}>
+            Assicurarsi che qreport-server esponga{" "}
+            <code style={{ fontFamily: "monospace", fontSize: 12 }}>GET /api/version</code>{" "}
+            e che la versione sia ≥ {REQUIRED_SERVER_VERSION}.
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default async function DashboardPage() {
-  const [clients, facilities, islands, contacts] = await Promise.allSettled([
-    getClients(), getFacilities(), getIslands(), getContacts(),
+  const [clients, facilities, islands, contacts, serverVersion] = await Promise.allSettled([
+    getClients(), getFacilities(), getIslands(), getContacts(), getServerVersion(),
   ]);
 
   const count = (r: PromiseSettledResult<{ total: number }>) =>
     r.status === "fulfilled" ? r.value.total : 0;
+
+  const version = serverVersion.status === "fulfilled" ? serverVersion.value : null;
 
   return (
     <div>
@@ -31,7 +69,14 @@ export default async function DashboardPage() {
           <h1 className="page-title">Dashboard</h1>
           <p className="page-subtitle">Panoramica del sistema QReport</p>
         </div>
+        {version && (
+          <span style={{ fontSize: 12, color: "var(--color-text-muted)", alignSelf: "flex-end" }}>
+            Server: v{version}
+          </span>
+        )}
       </div>
+
+      <CompatibilityBanner serverVersion={version} />
 
       <div style={{
         display: "grid",
