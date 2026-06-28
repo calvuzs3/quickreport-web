@@ -1,4 +1,6 @@
-import { cookies } from "next/headers";
+import { clearSession, getSessionToken } from "@/lib/auth";
+import { KTOR_URL } from "@/lib/config";
+import { redirect } from "next/navigation";
 import type {
   Client,
   Contact,
@@ -16,36 +18,39 @@ import type {
   ApiList,
 } from "@/types";
 
-const KTOR_URL = process.env.KTOR_API_URL ?? "http://192.168.0.191:8080";
-
-// ─── Token helper ─────────────────────────────────────────────────────────────
-
-export async function getToken(): Promise<string | null> {
-  const store = await cookies();
-  return store.get("qreport_token")?.value ?? null;
-}
-
 // ─── Base fetch ───────────────────────────────────────────────────────────────
 
 async function apiFetch<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = await getToken();
+  const token = await getSessionToken();
 
-  const res = await fetch(`${KTOR_URL}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-    cache: "no-store",
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${KTOR_URL}${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+      },
+      cache: "no-store",
+    });
+  } catch (err) {
+    throw new Error(
+      `Impossibile raggiungere il server Ktor (${KTOR_URL}). Verificare che il server sia attivo e che KTOR_API_URL sia corretto.`,
+      { cause: err }
+    );
+  }
 
   if (!res.ok) {
+    if (res.status === 401) {
+      await clearSession();
+      redirect("/login");
+    }
     const text = await res.text().catch(() => "");
-    throw new Error(`API ${res.status}: ${text}`);
+    throw new Error(`Errore dal server: ${res.status} ${res.statusText} — ${text}`);
   }
 
   return res.json() as Promise<T>;

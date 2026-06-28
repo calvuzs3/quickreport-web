@@ -78,11 +78,52 @@
   opacity: 0.9;
 }
 
+/* ─── Admin divider ──────────────────────────────────────────────────────── */
+
+.navDivider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 10px 4px;
+  margin-top: 4px;
+}
+
+.navDivider::before {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.navDivider span {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.30);
+  white-space: nowrap;
+}
+
 /* ─── Footer ─────────────────────────────────────────────────────────────── */
 
 .footer {
   padding: 12px 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.userInfo {
+  padding: 4px 10px 6px;
+}
+
+.userRole {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .logoutBtn {

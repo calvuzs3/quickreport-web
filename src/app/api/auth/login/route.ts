@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { saveSession } from "@/lib/auth";
-
-const KTOR_URL = process.env.KTOR_API_URL ?? "http://192.168.0.191:8080";
+import { KTOR_URL } from "@/lib/config";
 
 export async function POST(req: NextRequest) {
   try {
