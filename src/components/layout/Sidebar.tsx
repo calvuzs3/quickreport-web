@@ -194,6 +194,7 @@ export default function Sidebar({ role }: SidebarProps) {
       <div className={styles.footer}>
         <div className={styles.userInfo}>
           <span className={styles.userRole}>{admin ? "Admin" : "Tecnico"}</span>
+          <span className={styles.appVersion}>v{process.env.NEXT_PUBLIC_APP_VERSION}</span>
         </div>
         <button className={styles.logoutBtn} onClick={handleLogout}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

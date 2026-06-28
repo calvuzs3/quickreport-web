@@ -116,6 +116,9 @@
 
 .userInfo {
   padding: 4px 10px 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
 }
 
 .userRole {
@@ -124,6 +127,12 @@
   color: rgba(255, 255, 255, 0.35);
   text-transform: uppercase;
   letter-spacing: 0.06em;
+}
+
+.appVersion {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.20);
+  font-variant-numeric: tabular-nums;
 }
 
 .logoutBtn {
