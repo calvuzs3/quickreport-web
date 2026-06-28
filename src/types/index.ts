@@ -219,6 +219,31 @@ export interface Checkup {
   is_deleted: boolean;
 }
 
+// ─── Users (admin management) ────────────────────────────────────────────────
+
+export type UserRole = "ADMIN" | "TECHNICIAN";
+
+export interface User {
+  id: string;
+  username: string;
+  role: UserRole;
+  is_active: boolean;
+  created_at: number; // epoch ms
+  updated_at: number; // epoch ms
+}
+
+export interface CreateUserRequest {
+  username: string;
+  password: string;
+  role: UserRole;
+}
+
+export interface UpdateUserRequest {
+  role?: UserRole;
+  is_active?: boolean;
+  password?: string;
+}
+
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 export interface LoginRequest {

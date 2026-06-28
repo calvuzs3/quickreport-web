@@ -13,6 +13,7 @@ const TOKEN_COOKIE = "qreport_token";
 
 // Routes accessible only by ADMIN role
 const ADMIN_PREFIXES = [
+  "/users",
   "/island-types",
   "/module-types",
   "/criticality-levels",

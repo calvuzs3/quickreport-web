@@ -15,6 +15,9 @@ import type {
   CheckupStatus,
   CheckItemTemplate,
   Checkup,
+  User,
+  CreateUserRequest,
+  UpdateUserRequest,
   ApiList,
 } from "@/types";
 
@@ -434,6 +437,28 @@ export async function updateMaintenanceLog(
 
 export async function deleteMaintenanceLog(id: string): Promise<void> {
   await apiFetch(`/api/maintenance-logs/${id}`, { method: "DELETE" });
+}
+
+// ─── Users (admin) ───────────────────────────────────────────────────────────
+
+export async function getUsers(): Promise<ApiList<User>> {
+  return apiFetch<ApiList<User>>("/admin/users");
+}
+
+export async function getUser(id: string): Promise<User> {
+  return apiFetch<User>(`/admin/users/${id}`);
+}
+
+export async function createUser(data: CreateUserRequest): Promise<User> {
+  return apiFetch<User>("/admin/users", { method: "POST", body: JSON.stringify(data) });
+}
+
+export async function updateUser(id: string, data: UpdateUserRequest): Promise<User> {
+  return apiFetch<User>(`/admin/users/${id}`, { method: "PUT", body: JSON.stringify(data) });
+}
+
+export async function disableUser(id: string): Promise<void> {
+  await apiFetch(`/admin/users/${id}`, { method: "DELETE" });
 }
 
 // ─── Checkups (read-only) ─────────────────────────────────────────────────────
