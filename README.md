@@ -167,9 +167,23 @@ Set `KTOR_API_URL` and `SESSION_SECRET` in `.env.local` on the server before dep
 
 ---
 
+## Compatibility check
+
+On every dashboard load the webapp calls `GET /api/version` on Ktor (no auth required) and compares the response against the minimum required version (`1.4.0`).
+
+| Result | Banner |
+|---|---|
+| Version ≥ minimum | No banner; version shown top-right |
+| Version < minimum | Red error banner — incompatibilità rilevata |
+| Endpoint absent or Ktor unreachable | Yellow info banner — versione sconosciuta |
+
+The check is non-blocking: the webapp continues to function but administrators are warned of a mismatch. **Bump `REQUIRED_SERVER_VERSION` in `src/lib/compat.ts`** whenever the webapp starts depending on a new Ktor endpoint.
+
+---
+
 ## Relationship with qreport-server
 
-Requires `qreport-server` v1.2.0 or later. All endpoints require `Authorization: Bearer <token>`.
+Requires `qreport-server` v1.4.0 or later (the version that introduced `GET /api/version`). All authenticated endpoints require `Authorization: Bearer <token>`.
 
 ### Standard CRUD endpoints (all roles)
 
@@ -190,6 +204,12 @@ GET/PUT/DELETE        /api/clients/{id}
 /api/checkup-statuses      (?all=true to include inactive)
 /api/check-item-templates  (?moduleTypeId= filter)
 /api/checkups              (?clientId= / ?islandId= filter, read-only)
+```
+
+### Version endpoint (no auth)
+
+```
+GET  /api/version   →  { "name": "qreport-server", "version": "x.y.z" }
 ```
 
 ### Admin-only endpoints (role = ADMIN, 403 otherwise)

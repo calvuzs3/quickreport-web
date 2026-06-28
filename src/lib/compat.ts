@@ -1,6 +1,6 @@
 // Minimum qreport-server version required by this webapp.
 // Bump this when a new Ktor endpoint is added that the webapp depends on.
-export const REQUIRED_SERVER_VERSION = "1.3.0";
+export const REQUIRED_SERVER_VERSION = "1.4.0";
 
 export type CompatibilityStatus =
   | { ok: true;  version: string }

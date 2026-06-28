@@ -110,6 +110,20 @@ Key utility classes:
 
 The version is the `"version"` field in `package.json`. `next.config.ts` reads it at build time and exposes it as `NEXT_PUBLIC_APP_VERSION`. The Sidebar displays it in the footer. **Update `package.json` on every release.**
 
+### Server compatibility check
+
+`src/lib/compat.ts` defines `REQUIRED_SERVER_VERSION` — the minimum `qreport-server` version this webapp requires. On every dashboard load, `getServerVersion()` calls `GET /api/version` on Ktor (no auth, returns `{ name, version }`). The result is passed to `checkCompatibility()` which returns one of three states:
+
+| State | Meaning |
+|---|---|
+| `ok: true` | version ≥ minimum — no banner shown |
+| `ok: false` | version present but below minimum — red error banner |
+| `ok: null` | endpoint missing or Ktor unreachable — yellow info banner |
+
+**When to bump `REQUIRED_SERVER_VERSION`:** any time a new Ktor endpoint is added that the webapp depends on, update the constant in `compat.ts` to the Ktor release that introduced it. The check is intentionally non-blocking — the webapp keeps working, but admins are warned.
+
+`GET /api/version` must be unauthenticated on Ktor and return `{ "name": "qreport-server", "version": "x.y.z" }`. The minimum version is currently `1.4.0` (the Ktor release that added this endpoint).
+
 ### Adding a new entity (standard pattern)
 
 1. Add interface to `src/types/index.ts`
