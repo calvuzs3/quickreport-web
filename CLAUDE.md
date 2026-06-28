@@ -16,9 +16,12 @@ No test suite is configured (`npm test` exits with error).
 
 ```bash
 cp .env.local.example .env.local
-# Set KTOR_API_URL and SESSION_SECRET, then:
+# Edit .env.local: set KTOR_API_URL and generate SESSION_SECRET with:
+#   openssl rand -base64 32
 npm install && npm run dev
 ```
+
+`SESSION_SECRET` must be a static value (not a shell substitution) — it is used to sign session cookies and must not change between restarts, or all active sessions are invalidated.
 
 ### Production deploy
 
@@ -34,60 +37,86 @@ The container listens on port 3001 and sits behind Nginx Proxy Manager.
 
 ## Architecture
 
-This is a **Next.js 15 App Router** frontend that acts purely as a thin proxy and server-rendered UI over the `qreport-server` Ktor backend. There is no local database.
+**Next.js 15 App Router** frontend — a thin proxy and server-rendered UI over the `qreport-server` Ktor backend. No local database.
 
 ### Two distinct data access patterns
 
-**Server components** call `src/lib/api.ts` directly. `apiFetch()` reads the session cookie server-side and forwards requests to `KTOR_API_URL`. Pages use `async/await` at the component level and call `notFound()` on errors.
+**Server components** call `src/lib/api.ts` directly. `apiFetch()` reads `qreport_token` from the session, forwards the request to `KTOR_URL`, and handles errors:
+- Network error → throws with a message that includes the actual `KTOR_URL` value
+- 401 from Ktor → clears session cookies and redirects to `/login`
 
-**Client components** (forms, action buttons) call the Next.js API routes under `src/app/api/`. These route handlers use `proxyRequest()` from `src/lib/proxy.ts`, which forwards the HTTP request verbatim (including body and query string) to Ktor with the session token attached. The browser never sees the Ktor token.
+**Client components** (forms, action buttons) call the Next.js API routes under `src/app/api/`. These use `proxyRequest()` from `src/lib/proxy.ts`, which forwards the request verbatim to Ktor. The Ktor token never leaves the server.
+
+### Configuration
+
+`src/lib/config.ts` exports `KTOR_URL`. It throws at startup if `KTOR_API_URL` is not set — there is no hardcoded fallback. All files that need the backend URL import from here.
 
 ### Auth flow
 
-Two cookies are set on login:
-- `qreport_token` — raw Ktor JWT; forwarded as `Authorization: Bearer` on every Ktor call
-- `qreport_session` — HMAC-signed JWT (`HS256`, `SESSION_SECRET`) containing `{ role }`; the role value comes from Ktor's login response and is cryptographically bound — never read from the JWT payload, never stored as a plain string
+Two cookies are set on successful login:
+- `qreport_token` — raw Ktor JWT, forwarded as `Authorization: Bearer` on every backend call
+- `qreport_session` — HMAC-signed JWT (`HS256`, `SESSION_SECRET`) containing `{ role }`; the role value is taken from Ktor's login response and cryptographically bound — the JWT payload is never decoded client-side
 
-**Middleware** (`src/middleware.ts`, Edge runtime) verifies the `qreport_session` HMAC signature on every non-public request. Admin-only paths (`/island-types`, `/module-types`, `/criticality-levels`, `/checkup-statuses`, `/check-item-templates`) redirect to `/dashboard` for non-ADMIN users.
+**Middleware** (`src/middleware.ts`, Edge runtime) runs on every non-public request:
+1. Verifies the `qreport_session` HMAC signature; clears cookies and redirects to `/login` if invalid/expired
+2. Blocks access to admin-only paths for non-ADMIN users (redirects to `/dashboard`)
+
+Admin-only path prefixes (defined in `src/middleware.ts`):
+```
+/users, /island-types, /module-types, /criticality-levels,
+/checkup-statuses, /check-item-templates
+```
 
 **Server-side guards** in `src/lib/auth.ts`:
-- `requireAuth()` — verifies session, redirects to `/login` if invalid
-- `requireAdmin()` — additionally checks `role === "ADMIN"`, redirects to `/dashboard` otherwise
+- `requireAuth()` → verifies session, redirects to `/login` if missing
+- `requireAdmin()` → calls `requireAuth()` then checks `role === "ADMIN"`, redirects to `/dashboard` otherwise
+- `getVerifiedSession()` → returns `{ token, role }` or `null` (no redirect)
 
-If Ktor returns 401 (token expired/revoked), `apiFetch` in `src/lib/api.ts` clears the session and redirects to `/login`.
+**`GET /api/auth/me`** — verifies the local session and pings Ktor with the bearer token to confirm it is still accepted. Returns `{ role, ktorReachable }` or 401/502.
 
-**`/api/auth/me`** — verifies the local session AND pings Ktor to confirm the bearer token is still accepted. Returns `{ role, ktorReachable }`.
-
-**Sidebar** is a client component that receives `role` as a prop from the server layout. ADMIN users see an additional "Configurazione" section with master data routes. Non-admins cannot see or navigate to those routes.
+**Sidebar** is a `"use client"` component that receives `role: string` as a prop from the server layout (`src/app/(dashboard)/layout.tsx`). ADMIN users see a "Configurazione" section; TECHNICIAN users do not.
 
 ### Route structure
 
-- `src/app/(dashboard)/` — protected route group; all pages here require auth
-- `src/app/api/` — proxy route handlers; each file is a thin wrapper around `proxyRequest()`
-- `src/app/login/` — public login page
+- `src/app/(dashboard)/` — protected route group; layout calls `requireAuth()` and passes `role` to Sidebar
+- `src/app/api/` — proxy route handlers; thin wrappers around `proxyRequest()`
+- `src/app/api/admin/` — admin-only proxy routes (Ktor enforces `role = ADMIN` server-side via 403)
+- `src/app/login/` — public
 
 ### Entity model
 
-All entities extend `SyncFields` (`created_at`, `updated_at`, `synced_at`, `is_deleted`) — matching the PostgreSQL schema in `qreport-server`. Dates are **epoch milliseconds** (use `formatDate()` from `src/lib/utils.ts` to display them).
+Sync entities extend `SyncFields` (`created_at`, `updated_at`, `synced_at`, `is_deleted`) — matching the PostgreSQL schema in `qreport-server`. Dates are **epoch milliseconds**; use `formatDate()` / `formatDateTime()` from `src/lib/utils.ts`.
 
 Hierarchy: `Client → Facility → FacilityIsland → MechanicalUnit / MaintenanceLog`
 
-Deletions are **soft-delete only** (`is_deleted = true`). UI code must filter `!entity.is_deleted` when displaying lists. Entities with `is_active` have a `ToggleActiveButton` component.
+Deletions are **soft-delete only** (`is_deleted = true`). Always filter `!entity.is_deleted` when rendering lists. Entities with `is_active` have a `ToggleActiveButton` component pattern.
+
+`User` does not extend `SyncFields` — it has only `id`, `username`, `role`, `is_active`, `created_at`, `updated_at`. Deletion via `DELETE /admin/users/{id}` sets `is_active = false`.
 
 ### Styling
 
-No Tailwind. Styling uses:
-- CSS variables defined in `src/app/globals.css` (colours, spacing)
-- Utility classes defined there: `btn`, `btn-primary`, `btn-secondary`, `btn-sm`, `badge`, `badge-green`, `badge-red`, `badge-orange`, `badge-blue`, `card`, `page-title`, `page-subtitle`, `page-header`, `table`
-- CSS Modules for layout components (`layout.module.css`, `Sidebar.module.css`)
-- Inline `style` props for one-off adjustments
+No Tailwind. Everything is in `src/app/globals.css` (CSS variables + utility classes) and CSS Modules for layout components.
 
-### Adding a new entity
+Key utility classes:
+- **Layout**: `card`, `page-header`, `page-title`, `page-subtitle`, `table-wrapper`
+- **Buttons**: `btn`, `btn-primary`, `btn-secondary`, `btn-danger`, `btn-sm`
+- **Badges**: `badge`, `badge-green`, `badge-red`, `badge-orange`, `badge-blue`
+- **Forms**: `form-group`, `form-label`, `form-input`, `form-select`, `form-textarea`, `form-card`, `form-row`, `form-actions`
+- **Alerts**: `alert`, `alert-error`, `alert-success`
 
-1. Add types to `src/types/index.ts`
-2. Add CRUD functions to `src/lib/api.ts` (following existing patterns)
-3. Add API route handlers under `src/app/api/<entity>/` and `src/app/api/<entity>/[id]/` using `proxyRequest()`
+`form-card` is the standard wrapper for standalone forms (max-width 560px). `form-actions` is the button row at the bottom.
+
+### App version
+
+The version is the `"version"` field in `package.json`. `next.config.ts` reads it at build time and exposes it as `NEXT_PUBLIC_APP_VERSION`. The Sidebar displays it in the footer. **Update `package.json` on every release.**
+
+### Adding a new entity (standard pattern)
+
+1. Add interface to `src/types/index.ts`
+2. Add CRUD functions to `src/lib/api.ts` using `apiFetch()`
+3. Add proxy routes under `src/app/api/<entity>/` and `src/app/api/<entity>/[id]/`
 4. Add dashboard pages under `src/app/(dashboard)/<entity>/`
+5. If admin-only: add the path prefix to `ADMIN_PREFIXES` in `src/middleware.ts` and add it to `ADMIN_ITEMS` in `Sidebar.tsx`
 
 ### UI language
 
