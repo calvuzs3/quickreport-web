@@ -21,3 +21,7 @@ npm-debug.log*
 /.idea/modules.xml
 /.idea/QReportWeb.iml
 /.idea/vcs.xml
+
+# claude
+/CALUDE*
+/.claude

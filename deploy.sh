@@ -86,8 +86,8 @@ deploy() {
     info "Removing stopped containers..."
     sudo docker container prune -f
 
-    info "Building Docker image (no cache)..."
-    sudo docker compose build --no-cache
+    info "Building Docker image..."
+    sudo docker compose build
 
     info "Starting container..."
     sudo docker compose up -d
