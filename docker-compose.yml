@@ -1,7 +1,7 @@
 services:
-  qreport-web:
+  quickreport-web:
     build: .
-    container_name: qreport-web
+    container_name: quickreport-web
     restart: unless-stopped
     ports:
       - "3001:3000"

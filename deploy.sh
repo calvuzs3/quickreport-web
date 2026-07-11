@@ -4,9 +4,9 @@
 # All sensitive vars live in $APP_DIR/.env.local on the server.
 # Create it once manually — the script will source it automatically.
 
-DOMAIN_NAME="qreportweb.calvuz.net"
-REPO_URL="https://github.com/calvuzs3/qreportweb.git"
-APP_DIR=~/qreport-web
+DOMAIN_NAME="quickreport-web.calvuz.net"
+REPO_URL="https://github.com/calvuzs3/quickreport-web.git"
+APP_DIR=~/quickreport-web
 ENV_FILE="$APP_DIR/.env.local"
 
 MODE=${1:-"update"}
@@ -94,7 +94,7 @@ deploy() {
 
     sleep 8
 
-    if ! sudo docker ps | grep -q "qreport-web"; then
+    if ! sudo docker ps | grep -q "quickreport-web"; then
         error "Container failed to start. Check: sudo docker compose logs"
     fi
 
@@ -108,7 +108,7 @@ deploy() {
 
     echo ""
     info "Deployment complete."
-    echo "  ✅ qreport-web running on port 3001"
+    echo "  ✅ quickreport-web running on port 3001"
     echo "  ✅ Ktor backend: $KTOR_API_URL"
     echo "  🌐 NPM: $DOMAIN_NAME → $(hostname -I | awk '{print $1}'):3001"
     echo ""

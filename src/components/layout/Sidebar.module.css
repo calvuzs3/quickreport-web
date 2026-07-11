@@ -4,7 +4,7 @@
   left: 0;
   width: var(--sidebar-width);
   height: 100vh;
-  background: var(--color-text);
+  background: var(--color-graphite-surface);
   display: flex;
   flex-direction: column;
   z-index: 100;
@@ -27,6 +27,7 @@
   width: 36px;
   height: 36px;
   background: var(--color-primary);
+  color: var(--color-ink-on-accent);
   border-radius: 8px;
   flex-shrink: 0;
 }
@@ -68,7 +69,7 @@
 
 .navItem.active {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-ink-on-accent);
 }
 
 .navIcon {

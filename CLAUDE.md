@@ -37,11 +37,11 @@ The container listens on port 3001 and sits behind Nginx Proxy Manager.
 
 ## Architecture
 
-**Next.js 15 App Router** frontend — a thin proxy and server-rendered UI over the `qreport-server` Ktor backend. No local database.
+**Next.js 15 App Router** frontend — a thin proxy and server-rendered UI over the `quickreport-server` Ktor backend. No local database.
 
 ### Two distinct data access patterns
 
-**Server components** call `src/lib/api.ts` directly. `apiFetch()` reads `qreport_token` from the session, forwards the request to `KTOR_URL`, and handles errors:
+**Server components** call `src/lib/api.ts` directly. `apiFetch()` reads `quickreport_token` from the session, forwards the request to `KTOR_URL`, and handles errors:
 - Network error → throws with a message that includes the actual `KTOR_URL` value
 - 401 from Ktor → clears session cookies and redirects to `/login`
 
@@ -54,11 +54,11 @@ The container listens on port 3001 and sits behind Nginx Proxy Manager.
 ### Auth flow
 
 Two cookies are set on successful login:
-- `qreport_token` — raw Ktor JWT, forwarded as `Authorization: Bearer` on every backend call
-- `qreport_session` — HMAC-signed JWT (`HS256`, `SESSION_SECRET`) containing `{ role }`; the role value is taken from Ktor's login response and cryptographically bound — the JWT payload is never decoded client-side
+- `quickreport_token` — raw Ktor JWT, forwarded as `Authorization: Bearer` on every backend call
+- `quickreport_session` — HMAC-signed JWT (`HS256`, `SESSION_SECRET`) containing `{ role }`; the role value is taken from Ktor's login response and cryptographically bound — the JWT payload is never decoded client-side
 
 **Middleware** (`src/middleware.ts`, Edge runtime) runs on every non-public request:
-1. Verifies the `qreport_session` HMAC signature; clears cookies and redirects to `/login` if invalid/expired
+1. Verifies the `quickreport_session` HMAC signature; clears cookies and redirects to `/login` if invalid/expired
 2. Blocks access to admin-only paths for non-ADMIN users (redirects to `/dashboard`)
 
 Admin-only path prefixes (defined in `src/middleware.ts`):
@@ -85,7 +85,7 @@ Admin-only path prefixes (defined in `src/middleware.ts`):
 
 ### Entity model
 
-Sync entities extend `SyncFields` (`created_at`, `updated_at`, `synced_at`, `is_deleted`) — matching the PostgreSQL schema in `qreport-server`. Dates are **epoch milliseconds**; use `formatDate()` / `formatDateTime()` from `src/lib/utils.ts`.
+Sync entities extend `SyncFields` (`created_at`, `updated_at`, `synced_at`, `is_deleted`) — matching the PostgreSQL schema in `quickreport-server`. Dates are **epoch milliseconds**; use `formatDate()` / `formatDateTime()` from `src/lib/utils.ts`.
 
 Hierarchy: `Client → Facility → FacilityIsland → MechanicalUnit / MaintenanceLog`
 
@@ -112,7 +112,7 @@ The version is the `"version"` field in `package.json`. `next.config.ts` reads i
 
 ### Server compatibility check
 
-`src/lib/compat.ts` defines `REQUIRED_SERVER_VERSION` — the minimum `qreport-server` version this webapp requires. On every dashboard load, `getServerVersion()` calls `GET /api/version` on Ktor (no auth, returns `{ name, version }`). The result is passed to `checkCompatibility()` which returns one of three states:
+`src/lib/compat.ts` defines `REQUIRED_SERVER_VERSION` — the minimum `quickreport-server` version this webapp requires. On every dashboard load, `getServerVersion()` calls `GET /api/version` on Ktor (no auth, returns `{ name, version }`). The result is passed to `checkCompatibility()` which returns one of three states:
 
 | State | Meaning |
 |---|---|
@@ -122,7 +122,7 @@ The version is the `"version"` field in `package.json`. `next.config.ts` reads i
 
 **When to bump `REQUIRED_SERVER_VERSION`:** any time a new Ktor endpoint is added that the webapp depends on, update the constant in `compat.ts` to the Ktor release that introduced it. The check is intentionally non-blocking — the webapp keeps working, but admins are warned.
 
-`GET /api/version` must be unauthenticated on Ktor and return `{ "name": "qreport-server", "version": "x.y.z" }`. The minimum version is currently `1.4.0` (the Ktor release that added this endpoint).
+`GET /api/version` must be unauthenticated on Ktor and return `{ "name": "quickreport-server", "version": "x.y.z" }`. The minimum version is currently `1.0.0` (the Ktor release that added this endpoint).
 
 ### Adding a new entity (standard pattern)
 

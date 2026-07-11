@@ -8,8 +8,8 @@ const SECRET = new TextEncoder().encode(
   process.env.SESSION_SECRET ?? "dev_secret_change_in_production"
 );
 
-const SESSION_COOKIE = "qreport_session";
-const TOKEN_COOKIE = "qreport_token";
+const SESSION_COOKIE = "quickreport_session";
+const TOKEN_COOKIE = "quickreport_token";
 
 // Routes accessible only by ADMIN role
 const ADMIN_PREFIXES = [

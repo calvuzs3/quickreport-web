@@ -1,6 +1,6 @@
 {
-  "name": "qreport-web",
-  "version": "1.4.1",
+  "name": "quickreport-web",
+  "version": "1.6.0",
   "description": "",
   "main": "index.js",
   "scripts": {

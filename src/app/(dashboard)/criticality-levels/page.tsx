@@ -48,7 +48,7 @@ export default async function CriticalityLevelsPage() {
             )}
             {levels.map(level => (
               <tr key={level.id}>
-                <td style={{ fontFamily: "monospace", fontSize: 13 }}>{level.code}</td>
+                <td style={{ fontFamily: "var(--font-mono)", fontSize: 13 }}>{level.code}</td>
                 <td style={{ fontWeight: 500 }}>
                   {level.icon_emoji && <span style={{ marginRight: 6 }}>{level.icon_emoji}</span>}
                   {level.label}
@@ -56,7 +56,7 @@ export default async function CriticalityLevelsPage() {
                 <td>
                   <span style={{
                     display: "inline-flex", alignItems: "center", gap: 6,
-                    fontFamily: "monospace", fontSize: 13,
+                    fontFamily: "var(--font-mono)", fontSize: 13,
                   }}>
                     <span style={{
                       display: "inline-block", width: 14, height: 14, borderRadius: 3,
