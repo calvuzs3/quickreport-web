@@ -229,5 +229,5 @@ Deletions on standard entities use soft delete (`is_deleted = true`) to keep the
 ## Git repositories
 
 - Android app: `quickreport`
-- Ktor server: `quickreportserver`
-- This web app: `quickreportweb`
+- Ktor server: `quickreport-server`
+- This web app: `quickreport-web`

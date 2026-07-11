@@ -5,7 +5,7 @@
 # Create it once manually — the script will source it automatically.
 
 DOMAIN_NAME="quickreport-web.calvuz.net"
-REPO_URL="https://github.com/calvuzs3/quickreportweb.git"
+REPO_URL="https://github.com/calvuzs3/quickreport-web.git"
 APP_DIR=~/quickreport-web
 ENV_FILE="$APP_DIR/.env.local"
 
