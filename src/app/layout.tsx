@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "QReport Admin",
-  description: "QReport — industrial checkup management",
+  title: "QuickReport Admin",
+  description: "QuickReport — industrial checkup management",
 };
 
 export default function RootLayout({

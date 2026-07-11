@@ -1,12 +1,12 @@
-# QReport Web
+# QuickReport Web
 
-Version:    1.4.2
-Date:       28 June 2026
+Version:    1.5.0
+Date:       11 July 2026
 
 
-Web administration interface for QReport — the industrial equipment checkup management system.
+Web administration interface for QuickReport — the industrial equipment checkup management system.
 
-Built with Next.js 15, it connects to the existing Ktor backend (`qreport-server`) via the internal LAN and provides full CRUD access to all client management entities, master data configuration, and user administration.
+Built with Next.js 15, it connects to the existing Ktor backend (`quickreport-server`) via the internal LAN and provides full CRUD access to all client management entities, master data configuration, and user administration.
 
 ---
 
@@ -17,14 +17,14 @@ Built with Next.js 15, it connects to the existing Ktor backend (`qreport-server
 | Framework | Next.js 15 (App Router) |
 | Language | TypeScript |
 | Auth | JWT cookie session (jose / HMAC-HS256) |
-| Backend | Ktor REST API (`qreport-server`) |
+| Backend | Ktor REST API (`quickreport-server`) |
 | Deploy | Docker + Nginx Proxy Manager |
 
 ---
 
 ## Features
 
-- Login with existing `qreport-server` credentials (same JWT as the Android app)
+- Login with existing `quickreport-server` credentials (same JWT as the Android app)
 - Role-based access: **ADMIN** and **TECHNICIAN** — enforced in middleware and server-side guards
 - Dashboard with entity counts and quick actions
 - Full CRUD for: Clients, Facilities, Robotic Islands, Contacts, Contracts
@@ -96,7 +96,7 @@ src/
 ## Prerequisites
 
 - Node.js 20+
-- A running `qreport-server` instance reachable on the LAN (v1.2.0+)
+- A running `quickreport-server` instance reachable on the LAN (v1.0.0+)
 
 ---
 
@@ -134,8 +134,8 @@ These variables must **never** be committed. `.env.local` is already in `.gitign
 ## Auth & security
 
 Session cookies:
-- `qreport_token` — raw Ktor JWT, forwarded as `Authorization: Bearer` on every backend call; `httpOnly`, `secure` (in production), `sameSite=lax`
-- `qreport_session` — HMAC-signed JWT containing `{ role }`; the role is taken from Ktor's login response and cryptographically bound with `SESSION_SECRET`; never decoded client-side
+- `quickreport_token` — raw Ktor JWT, forwarded as `Authorization: Bearer` on every backend call; `httpOnly`, `secure` (in production), `sameSite=lax`
+- `quickreport_session` — HMAC-signed JWT containing `{ role }`; the role is taken from Ktor's login response and cryptographically bound with `SESSION_SECRET`; never decoded client-side
 
 `src/middleware.ts` (Edge runtime) verifies both cookies on every request and enforces role-based access before any page renders. Admin-only routes redirect TECHNICIAN users to `/dashboard`.
 
@@ -169,7 +169,7 @@ Set `KTOR_API_URL` and `SESSION_SECRET` in `.env.local` on the server before dep
 
 ## Compatibility check
 
-On every dashboard load the webapp calls `GET /api/version` on Ktor (no auth required) and compares the response against the minimum required version (`1.4.0`).
+On every dashboard load the webapp calls `GET /api/version` on Ktor (no auth required) and compares the response against the minimum required version (`1.0.0`).
 
 | Result | Banner |
 |---|---|
@@ -181,9 +181,9 @@ The check is non-blocking: the webapp continues to function but administrators a
 
 ---
 
-## Relationship with qreport-server
+## Relationship with quickreport-server
 
-Requires `qreport-server` v1.4.0 or later (the version that introduced `GET /api/version`). All authenticated endpoints require `Authorization: Bearer <token>`.
+Requires `quickreport-server` v1.0.0 or later (the version that introduced `GET /api/version`). All authenticated endpoints require `Authorization: Bearer <token>`.
 
 ### Standard CRUD endpoints (all roles)
 
@@ -209,7 +209,7 @@ GET/PUT/DELETE        /api/clients/{id}
 ### Version endpoint (no auth)
 
 ```
-GET  /api/version   →  { "name": "qreport-server", "version": "x.y.z" }
+GET  /api/version   →  { "name": "quickreport-server", "version": "x.y.z" }
 ```
 
 ### Admin-only endpoints (role = ADMIN, 403 otherwise)
@@ -228,6 +228,6 @@ Deletions on standard entities use soft delete (`is_deleted = true`) to keep the
 
 ## Git repositories
 
-- Android app: `qreport`
-- Ktor server: `qreportserver`
-- This web app: `qreportweb`
+- Android app: `quickreport`
+- Ktor server: `quickreportserver`
+- This web app: `quickreportweb`

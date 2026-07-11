@@ -6,11 +6,11 @@ const SECRET = new TextEncoder().encode(
   process.env.SESSION_SECRET ?? "dev_secret_change_in_production"
 );
 
-// qreport_session: HMAC-signed JWT containing { role } — the role value was
+// quickreport_session: HMAC-signed JWT containing { role } — the role value was
 // obtained from Ktor at login time and cannot be tampered without SESSION_SECRET.
-// qreport_token:   raw Ktor JWT forwarded on every backend call.
-const SESSION_COOKIE = "qreport_session";
-const TOKEN_COOKIE = "qreport_token";
+// quickreport_token:   raw Ktor JWT forwarded on every backend call.
+const SESSION_COOKIE = "quickreport_session";
+const TOKEN_COOKIE = "quickreport_token";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days, matching Ktor expiry
 
 export interface Session {

@@ -42,7 +42,7 @@ function CompatibilityBanner({ serverVersion }: { serverVersion: string | null }
         <span>{status.reason}</span>
         {status.ok === null && (
           <span style={{ display: "block", marginTop: 4, opacity: 0.8 }}>
-            Assicurarsi che qreport-server esponga{" "}
+            Assicurarsi che quickreport-server esponga{" "}
             <code style={{ fontFamily: "monospace", fontSize: 12 }}>GET /api/version</code>{" "}
             e che la versione sia ≥ {REQUIRED_SERVER_VERSION}.
           </span>
@@ -67,7 +67,7 @@ export default async function DashboardPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Dashboard</h1>
-          <p className="page-subtitle">Panoramica del sistema QReport</p>
+          <p className="page-subtitle">Panoramica del sistema QuickReport</p>
         </div>
         {version && (
           <span style={{ fontSize: 12, color: "var(--color-text-muted)", alignSelf: "flex-end" }}>

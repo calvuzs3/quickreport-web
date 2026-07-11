@@ -31,7 +31,7 @@ export default async function LoginPage() {
               <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
             </svg>
           </div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>QReport</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>QuickReport</h1>
           <p style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
             Industrial checkup management
           </p>
