@@ -48,13 +48,13 @@ export default async function CheckupStatusesPage() {
             )}
             {statuses.map(s => (
               <tr key={s.id}>
-                <td style={{ fontFamily: "monospace", fontSize: 13 }}>{s.code}</td>
+                <td style={{ fontFamily: "var(--font-mono)", fontSize: 13 }}>{s.code}</td>
                 <td style={{ fontWeight: 500 }}>
                   {s.icon_emoji && <span style={{ marginRight: 6 }}>{s.icon_emoji}</span>}
                   {s.label}
                 </td>
                 <td>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "monospace", fontSize: 13 }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "var(--font-mono)", fontSize: 13 }}>
                     <span style={{
                       display: "inline-block", width: 14, height: 14, borderRadius: 3,
                       background: s.color_hex, border: "1px solid rgba(0,0,0,.15)",

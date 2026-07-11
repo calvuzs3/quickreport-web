@@ -48,7 +48,7 @@ export default async function ModuleTypesPage() {
             )}
             {types.map(type => (
               <tr key={type.id}>
-                <td style={{ fontFamily: "monospace", fontSize: 13 }}>{type.code}</td>
+                <td style={{ fontFamily: "var(--font-mono)", fontSize: 13 }}>{type.code}</td>
                 <td style={{ fontWeight: 500 }}>{type.label}</td>
                 <td style={{ color: "var(--color-text-muted)" }}>{type.description ?? "—"}</td>
                 <td>{type.sort_order}</td>

@@ -50,7 +50,7 @@ export default async function UsersPage() {
             )}
             {users.map(user => (
               <tr key={user.id}>
-                <td style={{ fontWeight: 600, fontFamily: "monospace" }}>{user.username}</td>
+                <td style={{ fontWeight: 600, fontFamily: "var(--font-mono)" }}>{user.username}</td>
                 <td>
                   <span className={`badge ${user.role === "ADMIN" ? "badge-blue" : "badge-orange"}`}>
                     {user.role === "ADMIN" ? "Admin" : "Tecnico"}

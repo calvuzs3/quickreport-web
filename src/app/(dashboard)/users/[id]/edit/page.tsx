@@ -21,7 +21,7 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
         <div>
           <Link href="/users" style={{ color: "var(--color-text-muted)", fontSize: 13 }}>← Utenti</Link>
           <h1 className="page-title" style={{ marginTop: 4 }}>Modifica utente</h1>
-          <p className="page-subtitle" style={{ fontFamily: "monospace" }}>{user.username}</p>
+          <p className="page-subtitle" style={{ fontFamily: "var(--font-mono)" }}>{user.username}</p>
         </div>
       </div>
       <UserEditForm user={user} />

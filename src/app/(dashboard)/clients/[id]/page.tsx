@@ -116,7 +116,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                 <tr key={c.id}>
                   <td>{formatDate(c.checkup_date)}</td>
                   <td>{c.technician_name || "—"}</td>
-                  <td style={{ fontFamily: "monospace", fontSize: 12 }}>{c.island_serial_number || "—"}</td>
+                  <td style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>{c.island_serial_number || "—"}</td>
                   <td>{c.island_type || "—"}</td>
                   <td>
                     <span className={`badge ${c.status === "COMPLETED" ? "badge-green" : c.status === "DRAFT" ? "badge-orange" : "badge-blue"}`}>

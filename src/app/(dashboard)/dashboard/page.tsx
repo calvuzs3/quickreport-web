@@ -43,7 +43,7 @@ function CompatibilityBanner({ serverVersion }: { serverVersion: string | null }
         {status.ok === null && (
           <span style={{ display: "block", marginTop: 4, opacity: 0.8 }}>
             Assicurarsi che quickreport-server esponga{" "}
-            <code style={{ fontFamily: "monospace", fontSize: 12 }}>GET /api/version</code>{" "}
+            <code style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>GET /api/version</code>{" "}
             e che la versione sia ≥ {REQUIRED_SERVER_VERSION}.
           </span>
         )}
