@@ -20,6 +20,27 @@ export interface IslandType extends SyncFields {
   is_active: boolean;
 }
 
+// ─── Address (mirrors net.calvuz.qreport.app.app.domain.model.Address in the
+// Android app; serialized as JSON in headquarters_json / address_json) ────────
+
+export interface GeoCoordinates {
+  latitude: number;
+  longitude: number;
+  altitude?: number | null;
+  accuracy?: number | null;
+}
+
+export interface Address {
+  street?: string | null;
+  streetNumber?: string | null;
+  postalCode?: string | null;
+  city?: string | null;
+  province?: string | null;
+  country?: string;
+  coordinates?: GeoCoordinates | null;
+  notes?: string | null;
+}
+
 // ─── Entities ─────────────────────────────────────────────────────────────────
 
 export interface Client extends SyncFields {

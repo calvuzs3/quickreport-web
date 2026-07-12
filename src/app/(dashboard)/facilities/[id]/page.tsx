@@ -2,6 +2,7 @@ import { getFacility, getIslands, getClient } from "@/lib/api";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate, formatDateTime } from "@/lib/utils";
+import { parseAddress, formatAddress, googleMapsUrl } from "@/lib/address";
 import DeleteButton from "./DeleteButton";
 
 export default async function FacilityDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -15,6 +16,8 @@ export default async function FacilityDetailPage({ params }: { params: Promise<{
     ]);
   } catch { notFound(); }
   if (facility.is_deleted) notFound();
+
+  const address = parseAddress(facility.address_json);
 
   return (
     <div>
@@ -42,10 +45,17 @@ export default async function FacilityDetailPage({ params }: { params: Promise<{
             <InfoRow label="Codice" value={facility.code} />
             <InfoRow label="Tipo" value={facility.facility_type} />
             <InfoRow label="Primario" value={facility.is_primary ? "Sì" : "No"} />
+            <InfoRow label="Indirizzo" value={formatAddress(address)} />
             <InfoRow label="Note" value={facility.notes} />
             <InfoRow label="Creato" value={formatDate(facility.created_at)} />
             <InfoRow label="Ultima modifica" value={formatDateTime(facility.updated_at)} />
           </dl>
+          {address?.coordinates && (
+            <a href={googleMapsUrl(address.coordinates)} target="_blank" rel="noopener noreferrer"
+              className="btn btn-secondary btn-sm" style={{ marginTop: 12 }}>
+              🔗 Apri in Google Maps
+            </a>
+          )}
         </div>
 
         <div className="card">

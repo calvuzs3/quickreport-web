@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { generateId } from "@/lib/utils";
-import type { Client } from "@/types";
+import { serializeAddress } from "@/lib/address";
+import type { Client, Address } from "@/types";
+import AddressFields from "@/components/AddressFields";
 
 const FACILITY_TYPES = ["MANUFACTURING", "WAREHOUSE", "ASSEMBLY", "TESTING", "RESEARCH", "OTHER"];
 
@@ -19,6 +21,7 @@ export default function NewFacilityPage() {
     name: "", code: "", facility_type: "MANUFACTURING",
     notes: "", is_primary: false, is_active: true,
   });
+  const [address, setAddress] = useState<Address>({ country: "Italia" });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -37,7 +40,10 @@ export default function NewFacilityPage() {
     setError(null);
     setLoading(true);
     const now = Date.now();
-    const payload = { id: generateId(), ...form, created_at: now, updated_at: now, synced_at: null, is_deleted: false };
+    const payload = {
+      id: generateId(), ...form, address_json: serializeAddress(address),
+      created_at: now, updated_at: now, synced_at: null, is_deleted: false,
+    };
     try {
       const res = await fetch("/api/facilities", {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -98,6 +104,9 @@ export default function NewFacilityPage() {
             <textarea className="form-textarea" value={form.notes}
               onChange={e => set("notes", e.target.value)} />
           </div>
+
+          <h2 style={{ fontSize: 14, fontWeight: 600, marginTop: 4 }}>Indirizzo</h2>
+          <AddressFields value={address} onChange={setAddress} />
 
           <div style={{ display: "flex", gap: 20 }}>
             <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>

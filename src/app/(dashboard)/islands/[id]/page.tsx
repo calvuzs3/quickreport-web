@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import DeleteButton from "./DeleteButton";
+import MaintenanceLogsTable from "./MaintenanceLogsTable";
 import type { MaintenanceLog } from "@/types";
 
 export default async function IslandDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -131,51 +132,7 @@ export default async function IslandDetailPage({ params }: { params: Promise<{ i
           </Link>
         </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Tipo operazione</th>
-              <th>Componente</th>
-              <th>Esito</th>
-              <th>Tecnico</th>
-              <th>Durata</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {activeLogs.map((log: MaintenanceLog) => (
-              <tr key={log.id}>
-                <td style={{ whiteSpace: "nowrap" }}>{formatDate(log.performed_at)}</td>
-                <td>
-                  <OperationBadge type={log.operation_type} custom={log.custom_operation_label} />
-                </td>
-                <td style={{ color: "var(--color-text-muted)", fontSize: 12 }}>
-                  {log.component_label ?? "—"}
-                </td>
-                <td><OutcomeBadge outcome={log.outcome} /></td>
-                <td style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
-                  {log.technician_name}
-                </td>
-                <td style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
-                  {log.duration_minutes ? `${log.duration_minutes} min` : "—"}
-                </td>
-                <td style={{ textAlign: "right" }}>
-                  <Link href={`/islands/${id}/logs/${log.id}`} className="btn btn-secondary btn-sm">
-                    Dettagli
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {activeLogs.length === 0 && (
-              <tr>
-                <td colSpan={7} style={{ color: "var(--color-text-muted)", padding: 32, textAlign: "center" }}>
-                  Nessun intervento registrato
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <MaintenanceLogsTable islandId={id} logs={activeLogs} />
       </div>
     </div>
   );
@@ -187,37 +144,5 @@ function InfoRow({ label, value }: { label: string; value: string | null | undef
       <dt style={{ fontSize: 12, color: "var(--color-text-muted)", width: 160, flexShrink: 0 }}>{label}</dt>
       <dd style={{ fontSize: 13 }}>{value ?? "—"}</dd>
     </div>
-  );
-}
-
-function OperationBadge({ type, custom }: { type: string; custom: string | null }) {
-  const isEmergency = type === "EMERGENCY_REPAIR";
-  const isRevamping = type === "REVAMPING";
-  const label = type === "OTHER" && custom ? custom : type.replace(/_/g, " ");
-  return (
-    <span className={`badge ${isEmergency ? "badge-red" : isRevamping ? "badge-orange" : "badge-blue"}`}
-      style={{ fontSize: 11 }}>
-      {label}
-    </span>
-  );
-}
-
-function OutcomeBadge({ outcome }: { outcome: string }) {
-  const map: Record<string, string> = {
-    COMPLETED: "badge-green",
-    PARTIAL: "badge-orange",
-    DEFERRED: "badge-red",
-    REQUIRES_PARTS: "badge-red",
-  };
-  const labels: Record<string, string> = {
-    COMPLETED: "Completato",
-    PARTIAL: "Parziale",
-    DEFERRED: "Rimandato",
-    REQUIRES_PARTS: "Attende ricambi",
-  };
-  return (
-    <span className={`badge ${map[outcome] ?? "badge-blue"}`} style={{ fontSize: 11 }}>
-      {labels[outcome] ?? outcome}
-    </span>
   );
 }

@@ -4,10 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { generateId } from "@/lib/utils";
+import { serializeAddress } from "@/lib/address";
+import type { Address } from "@/types";
+import AddressFields from "@/components/AddressFields";
 
 export default function NewClientPage() {
   const router = useRouter();
   const [form, setForm] = useState({ company_name: "", notes: "", is_active: true });
+  const [address, setAddress] = useState<Address>({ country: "Italia" });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -20,7 +24,10 @@ export default function NewClientPage() {
     setError(null);
     setLoading(true);
     const now = Date.now();
-    const payload = { id: generateId(), ...form, created_at: now, updated_at: now, synced_at: null, is_deleted: false };
+    const payload = {
+      id: generateId(), ...form, headquarters_json: serializeAddress(address),
+      created_at: now, updated_at: now, synced_at: null, is_deleted: false,
+    };
     try {
       const res = await fetch("/api/clients", {
         method: "POST",
@@ -56,6 +63,10 @@ export default function NewClientPage() {
             <textarea className="form-textarea" value={form.notes}
               onChange={e => set("notes", e.target.value)} />
           </div>
+
+          <h2 style={{ fontSize: 14, fontWeight: 600, marginTop: 4 }}>Sede legale</h2>
+          <AddressFields value={address} onChange={setAddress} />
+
           <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
             <input type="checkbox" checked={form.is_active}
               onChange={e => set("is_active", e.target.checked)} />
