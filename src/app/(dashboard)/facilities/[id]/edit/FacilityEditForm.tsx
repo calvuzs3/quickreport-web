@@ -2,7 +2,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import type { Facility } from "@/types";
+import type { Facility, Address } from "@/types";
+import { parseAddress, serializeAddress } from "@/lib/address";
+import AddressFields from "@/components/AddressFields";
 
 const FACILITY_TYPES = ["MANUFACTURING", "WAREHOUSE", "ASSEMBLY", "TESTING", "RESEARCH", "OTHER"];
 
@@ -13,6 +15,7 @@ export default function FacilityEditForm({ facility }: { facility: Facility }) {
     facility_type: facility.facility_type, notes: facility.notes ?? "",
     is_primary: facility.is_primary, is_active: facility.is_active,
   });
+  const [address, setAddress] = useState<Address>(parseAddress(facility.address_json) ?? { country: "Italia" });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +26,9 @@ export default function FacilityEditForm({ facility }: { facility: Facility }) {
     try {
       const res = await fetch(`/api/facilities/${facility.id}`, {
         method: "PUT", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...facility, ...form, updated_at: Date.now() }),
+        body: JSON.stringify({
+          ...facility, ...form, address_json: serializeAddress(address), updated_at: Date.now(),
+        }),
       });
       if (!res.ok) { const d = await res.json().catch(() => ({})); setError(d.error ?? "Errore"); return; }
       router.push(`/facilities/${facility.id}`); router.refresh();
@@ -65,6 +70,10 @@ export default function FacilityEditForm({ facility }: { facility: Facility }) {
             <label className="form-label">Note</label>
             <textarea className="form-textarea" value={form.notes} onChange={e => set("notes", e.target.value)} />
           </div>
+
+          <h2 style={{ fontSize: 14, fontWeight: 600, marginTop: 4 }}>Indirizzo</h2>
+          <AddressFields value={address} onChange={setAddress} />
+
           <div style={{ display: "flex", gap: 20 }}>
             <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
               <input type="checkbox" checked={form.is_primary} onChange={e => set("is_primary", e.target.checked)} />

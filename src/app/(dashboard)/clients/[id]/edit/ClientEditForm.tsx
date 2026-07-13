@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import type { Client } from "@/types";
+import type { Client, Address } from "@/types";
+import { parseAddress, serializeAddress } from "@/lib/address";
+import AddressFields from "@/components/AddressFields";
 
 export default function ClientEditForm({ client }: { client: Client }) {
   const router = useRouter();
@@ -12,6 +14,7 @@ export default function ClientEditForm({ client }: { client: Client }) {
     notes: client.notes ?? "",
     is_active: client.is_active,
   });
+  const [address, setAddress] = useState<Address>(parseAddress(client.headquarters_json) ?? { country: "Italia" });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -27,7 +30,9 @@ export default function ClientEditForm({ client }: { client: Client }) {
       const res = await fetch(`/api/clients/${client.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...client, ...form, updated_at: Date.now() }),
+        body: JSON.stringify({
+          ...client, ...form, headquarters_json: serializeAddress(address), updated_at: Date.now(),
+        }),
       });
       if (!res.ok) { const d = await res.json().catch(() => ({})); setError(d.error ?? "Errore"); return; }
       router.push(`/clients/${client.id}`);
@@ -59,6 +64,10 @@ export default function ClientEditForm({ client }: { client: Client }) {
             <textarea className="form-textarea" value={form.notes}
               onChange={e => set("notes", e.target.value)} />
           </div>
+
+          <h2 style={{ fontSize: 14, fontWeight: 600, marginTop: 4 }}>Sede legale</h2>
+          <AddressFields value={address} onChange={setAddress} />
+
           <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
             <input type="checkbox" checked={form.is_active}
               onChange={e => set("is_active", e.target.checked)} />

@@ -2,6 +2,7 @@ import { getClient, getFacilities, getContacts, getContracts, getCheckups } from
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/utils";
+import { parseAddress, formatAddress, googleMapsUrl } from "@/lib/address";
 import DeleteButton from "./DeleteButton";
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -15,6 +16,8 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
 
   const checkups = await getCheckups(id).catch(() => ({ data: [] }));
   if (client.is_deleted) notFound();
+
+  const address = parseAddress(client.headquarters_json);
 
   return (
     <div>
@@ -35,29 +38,20 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-        <div className="card">
+        <div className="card" style={{ gridColumn: "1 / -1" }}>
           <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>Informazioni</h2>
           <dl style={{ display: "grid", gap: 10 }}>
+            <InfoRow label="Indirizzo" value={formatAddress(address)} />
             <InfoRow label="Note" value={client.notes} />
             <InfoRow label="Creato" value={formatDate(client.created_at)} />
             <InfoRow label="Ultima modifica" value={formatDate(client.updated_at)} />
           </dl>
-        </div>
-
-        <div className="card">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <h2 style={{ fontSize: 14, fontWeight: 600 }}>Contratti ({contracts.data.length})</h2>
-            <Link href={`/contracts/new?clientId=${id}`} className="btn btn-secondary btn-sm">+ Aggiungi</Link>
-          </div>
-          {contracts.data.filter(c => !c.is_deleted).map(c => (
-            <Link key={c.id} href={`/contracts/${c.id}`} style={{ display: "block", padding: "8px 0", borderBottom: "1px solid var(--color-border)", color: "inherit" }}>
-              <div style={{ fontWeight: 500, fontSize: 13 }}>{c.name ?? "Contratto senza nome"}</div>
-              <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
-                {formatDate(c.start_date)} → {formatDate(c.end_date)}
-              </div>
-            </Link>
-          ))}
-          {contracts.data.length === 0 && <p style={{ color: "var(--color-text-muted)", fontSize: 13 }}>Nessun contratto</p>}
+          {address?.coordinates && (
+            <a href={googleMapsUrl(address.coordinates)} target="_blank" rel="noopener noreferrer"
+              className="btn btn-secondary btn-sm" style={{ marginTop: 12 }}>
+              🔗 Apri in Google Maps
+            </a>
+          )}
         </div>
 
         <div className="card" style={{ gridColumn: "1 / -1" }}>
@@ -74,6 +68,31 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
             ))}
             {facilities.data.length === 0 && <p style={{ color: "var(--color-text-muted)", fontSize: 13 }}>Nessuno stabilimento</p>}
           </div>
+        </div>
+
+        <div className="card" style={{ gridColumn: "1 / -1" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <h2 style={{ fontSize: 14, fontWeight: 600 }}>Contratti ({contracts.data.length})</h2>
+            <Link href={`/contracts/new?clientId=${id}`} className="btn btn-secondary btn-sm">+ Aggiungi</Link>
+          </div>
+          <table><thead><tr><th>Nome</th><th>Inizio</th><th>Scadenza</th><th>Stato</th><th></th></tr></thead>
+            <tbody>
+              {contracts.data.filter(c => !c.is_deleted).map(c => (
+                <tr key={c.id}>
+                  <td style={{ fontWeight: 500 }}>{c.name ?? "Contratto senza nome"}</td>
+                  <td style={{ color: "var(--color-text-muted)" }}>{formatDate(c.start_date)}</td>
+                  <td style={{ color: "var(--color-text-muted)" }}>{formatDate(c.end_date)}</td>
+                  <td>
+                    <span className={`badge ${c.is_active ? "badge-green" : "badge-red"}`}>
+                      {c.is_active ? "Attivo" : "Inattivo"}
+                    </span>
+                  </td>
+                  <td><Link href={`/contracts/${c.id}`} className="btn btn-secondary btn-sm">Dettagli</Link></td>
+                </tr>
+              ))}
+              {contracts.data.length === 0 && <tr><td colSpan={5} style={{ color: "var(--color-text-muted)" }}>Nessun contratto</td></tr>}
+            </tbody>
+          </table>
         </div>
 
         <div className="card" style={{ gridColumn: "1 / -1" }}>
